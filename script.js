@@ -520,7 +520,7 @@ function initPageFlip(){
     maxHeight:size.height,
     drawShadow:true,
     flippingTime:900,
-    usePortrait:true,
+    usePortrait:single,
     startZIndex:0,
     autoSize:false,
     maxShadowOpacity:.65,
