@@ -308,3 +308,246 @@ th{background:var(--green);color:white}
   .feature-item,.feature-item:nth-child(-n+2){border-top:1px solid #dddddd}
   .feature-item:first-child{border-top:0}
 }
+
+/* =========================================================
+   TABLET FIX
+   iPad / Android tablets
+   ========================================================= */
+
+@media (min-width: 700px) and (max-width: 1366px) {
+
+  :root{
+    --topbar-height:68px;
+  }
+
+  html,
+  body{
+    width:100%;
+    min-height:100%;
+    overflow-x:hidden;
+  }
+
+  body{
+    background:#fff;
+  }
+
+  .topbar{
+    min-height:68px;
+    height:68px;
+    padding:7px 14px;
+    gap:10px;
+    flex-wrap:nowrap;
+  }
+
+  .brand{
+    flex:0 0 auto;
+    gap:8px;
+  }
+
+  .brand-logo{
+    width:118px;
+  }
+
+  .brand small{
+    display:none;
+  }
+
+  .actions{
+    flex:1 1 auto;
+    flex-wrap:nowrap;
+    justify-content:flex-end;
+    gap:6px;
+  }
+
+  .actions button{
+    min-height:42px;
+    padding:8px 11px;
+    font-size:13px;
+    white-space:nowrap;
+  }
+
+  .viewer{
+    width:100%;
+    min-height:calc(100dvh - 68px);
+    height:calc(100dvh - 68px);
+    padding:0;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .book{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .book-spread{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    padding:6px 42px;
+  }
+
+  /*
+     Главное исправление:
+     разворот использует почти всю доступную
+     высоту планшета.
+  */
+
+  .pages{
+    width:min(
+      calc(100vw - 92px),
+      calc((100dvh - 86px) * var(--spread-ratio))
+    );
+
+    max-width:none;
+    height:auto;
+    aspect-ratio:var(--spread-ratio);
+    margin:0 auto;
+  }
+
+  .pages.stf__parent{
+    width:min(
+      calc(100vw - 92px),
+      calc((100dvh - 86px) * var(--spread-ratio))
+    ) !important;
+
+    max-width:none !important;
+    margin:0 auto !important;
+  }
+
+  .page img{
+    width:100%;
+    height:100%;
+    object-fit:fill;
+  }
+
+  .page-arrow{
+    width:42px;
+    height:66px;
+    min-height:66px;
+    font-size:42px;
+    display:flex;
+  }
+
+  .page-arrow.prev{
+    left:6px;
+  }
+
+  .page-arrow.next{
+    right:6px;
+  }
+
+  .book-close{
+    top:78px;
+    right:12px;
+    width:42px;
+    height:42px;
+    min-height:42px;
+    font-size:28px;
+  }
+}
+
+
+/* =========================================================
+   TABLET LANDSCAPE
+   ========================================================= */
+
+@media
+  (min-width: 900px)
+  and (max-width: 1366px)
+  and (orientation: landscape) {
+
+  .viewer{
+    height:calc(100dvh - 68px);
+  }
+
+  .book-spread{
+    padding:4px 46px;
+  }
+
+  .pages{
+    width:min(
+      calc(100vw - 110px),
+      calc((100dvh - 78px) * var(--spread-ratio))
+    );
+  }
+
+  .pages.stf__parent{
+    width:min(
+      calc(100vw - 110px),
+      calc((100dvh - 78px) * var(--spread-ratio))
+    ) !important;
+  }
+
+  .page-arrow.prev{
+    left:8px;
+  }
+
+  .page-arrow.next{
+    right:8px;
+  }
+}
+
+
+/* =========================================================
+   TABLET PORTRAIT
+   В портретном положении показываем одну страницу крупно
+   ========================================================= */
+
+@media
+  (min-width: 700px)
+  and (max-width: 1000px)
+  and (orientation: portrait) {
+
+  .topbar{
+    height:auto;
+    min-height:68px;
+  }
+
+  .viewer{
+    min-height:calc(100dvh - 68px);
+    height:calc(100dvh - 68px);
+  }
+
+  .book-spread{
+    padding:8px 38px;
+  }
+
+  .pages{
+    width:min(
+      calc(100vw - 76px),
+      calc((100dvh - 100px) * var(--page-ratio))
+    );
+
+    aspect-ratio:var(--page-ratio);
+  }
+
+  .pages.stf__parent{
+    width:min(
+      calc(100vw - 76px),
+      calc((100dvh - 100px) * var(--page-ratio))
+    ) !important;
+  }
+
+  .page-arrow{
+    width:38px;
+    height:62px;
+    min-height:62px;
+  }
+
+  .page-arrow.prev{
+    left:4px;
+  }
+
+  .page-arrow.next{
+    right:4px;
+  }
+}
