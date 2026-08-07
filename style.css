@@ -89,14 +89,14 @@ button:disabled{opacity:.3;cursor:default}
 .book-cover span{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:max-content;max-width:90%;padding:12px 18px;border-radius:999px;background:#0b4a38e8;color:#fff;font-size:16px;box-shadow:0 6px 20px #0004}
 
 .book-spread{position:relative;width:100%;display:flex;align-items:center;justify-content:center}
-.pages{position:relative;width:min(calc(100vw - 36px),calc((100dvh - 136px) * var(--spread-ratio)),1320px);max-width:100%;aspect-ratio:var(--spread-ratio);height:auto;filter:drop-shadow(0 18px 18px #0007)}
-.pages.stf__parent{width:min(calc(100vw - 36px),calc((100dvh - 136px) * var(--spread-ratio)),1320px) !important;max-width:100% !important}
+.pages{position:relative;width:min(calc(100vw - 36px),calc((100dvh - 92px) * var(--spread-ratio)),1320px);max-width:100%;aspect-ratio:var(--spread-ratio);height:auto;filter:drop-shadow(0 18px 18px #0007)}
+.pages.stf__parent{width:min(calc(100vw - 36px),calc((100dvh - 92px) * var(--spread-ratio)),1320px) !important;max-width:100% !important}
 .pages::after{content:"";position:absolute;z-index:-1;left:50%;bottom:-7px;width:94%;height:16px;transform:translateX(-50%);border-radius:50%;background:#111;filter:blur(8px);opacity:.65}
 .page{position:relative;width:100%;height:100%;background:white;overflow:hidden}
 .page::after{content:"";position:absolute;z-index:2;top:0;bottom:0;width:22px;pointer-events:none}
 .page:nth-child(odd)::after{right:0;background:linear-gradient(90deg,transparent,#0003)}
 .page:nth-child(even)::after{left:0;background:linear-gradient(90deg,#0003,transparent)}
-.page img{width:100%;height:100%;display:block;object-fit:fill}
+.page img{width:100%;height:100%;display:block;object-fit:fill;-webkit-user-drag:none;user-select:none}
 .catalog-page-number{position:absolute;z-index:12;left:50%;bottom:10px;transform:translateX(-50%);min-width:24px;padding:3px 6px;border-radius:5px;background:#fffde8;color:#17382f;font-size:14px;font-weight:800;line-height:1.2;text-align:center;box-shadow:0 1px 5px #0003;opacity:.3;pointer-events:none}
 .book-opening .page{animation:openBookSpread .78s cubic-bezier(.3,.72,.18,1) both}
 .book-opening .page:first-of-type{transform-origin:right center}
@@ -114,8 +114,10 @@ button:disabled{opacity:.3;cursor:default}
 .page-arrow.prev{left:max(10px,calc((100vw - 1320px)/2 - 78px))}
 .page-arrow.next{right:max(10px,calc((100vw - 1320px)/2 - 78px))}
 .book:not(.is-closed) .page-arrow{display:flex}
-.book-controls{width:100%;display:flex;align-items:center;justify-content:center;margin-top:10px}
-.book-close{background:#292929cc;border:1px solid #ffffff30}
+.book-controls{display:none}
+.book-close{position:fixed;z-index:35;top:calc(var(--topbar-height) + 14px);right:max(18px,env(safe-area-inset-right));display:none;align-items:center;justify-content:center;width:48px;height:48px;min-height:48px;padding:0;border-radius:50%;background:#fffffff2;color:var(--green);border:1px solid #0b4a3826;font-size:34px;line-height:1;font-weight:700;box-shadow:0 14px 34px #0b1e1828, inset 0 2px 0 #fff}
+.book-close:hover,.book-close:focus-visible{opacity:1;background:var(--orange);color:#fff;outline:none;box-shadow:0 18px 38px #ff4b1640}
+.book:not(.is-closed) .book-close{display:flex}
 .page-indicator{display:none}
 .is-closed .book-spread,.is-closed .book-controls{display:none}
 .book:not(.is-closed) .book-cover,.book:not(.is-closed) .catalog-home{display:none}
@@ -174,7 +176,7 @@ th{background:var(--green);color:white}
   .catalog-row h1,.catalog-row h2{font-size:clamp(56px,10vw,88px)}
   .catalog-shelf{gap:clamp(24px,5vw,58px)}
   .catalog-shelf.two{padding-inline:clamp(42px,10vw,130px)}
-  .pages{width:min(calc(100vw - 28px),calc((100dvh - 136px) * var(--spread-ratio)),1120px)}
+  .pages{width:min(calc(100vw - 28px),calc((100dvh - 92px) * var(--spread-ratio)),1120px)}
 }
 
 @media(max-height:850px) and (orientation:landscape){
@@ -204,10 +206,10 @@ th{background:var(--green);color:white}
   .catalog-card .catalog-name{font-size:clamp(17px,3.8vw,26px)}
   .shelf{height:clamp(38px,8vw,60px)}
   .shelf::after{height:13px}
-  .pages{width:min(calc(100vw - 18px),calc((100dvh - 150px) * var(--page-ratio)),710px);aspect-ratio:var(--page-ratio)}
-  .pages.stf__parent{width:min(calc(100vw - 18px),calc((100dvh - 150px) * var(--page-ratio)),710px) !important}
+  .pages{width:min(calc(100vw - 18px),calc((100dvh - 100px) * var(--page-ratio)),710px);aspect-ratio:var(--page-ratio)}
+  .pages.stf__parent{width:min(calc(100vw - 18px),calc((100dvh - 100px) * var(--page-ratio)),710px) !important}
   .page-arrow{display:flex}
-  .book-controls{gap:8px;flex-wrap:wrap}
+  .book-close{top:calc(var(--topbar-height) + 12px);right:14px;width:44px;height:44px;min-height:44px;font-size:31px}
   .modal-card{max-height:calc(100dvh - 36px)}
 }
 
