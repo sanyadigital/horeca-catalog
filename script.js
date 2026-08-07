@@ -352,206 +352,609 @@ function formatArmenianPhone(value){
   if(digits.length>5) result+=' '+digits.slice(5,8);
   return result;
 }
-function pagesPerView(){
-  return window.innerWidth <= 900 || window.matchMedia('(orientation: portrait)').matches ? 1 : 2;
-}
-function pageToIndex(page){
-  return Math.max(0,Math.min(PAGE_COUNT-2,(+page||2)-2));
-}
-function catalogTargetRect(){
-  const single=pagesPerView()===1;
-  const ratio=single ? 1850/2813 : 3700/2813;
-  const widthLimit=single ? Math.min(window.innerWidth-18,710) : Math.min(window.innerWidth-36,1320);
-  const heightLimit=window.innerHeight-(single?100:92);
-  const width=Math.max(1,Math.min(widthLimit,heightLimit*ratio));
-  const height=width/ratio;
+function viewportSize(){
+  const vv = window.visualViewport;
+
   return {
-    left:(window.innerWidth-width)/2,
-    top:Math.max(document.querySelector('.topbar').getBoundingClientRect().bottom+10,(window.innerHeight-height)/2),
+    width: Math.round(vv?.width || window.innerWidth),
+    height: Math.round(vv?.height || window.innerHeight)
+  };
+}
+
+function pagesPerView(){
+  const { width, height } = viewportSize();
+
+  // Вертикально — одна страница
+  if (height > width) return 1;
+
+  // Горизонтально на планшете и компьютере — две страницы
+  return width >= 700 ? 2 : 1;
+}
+
+function pageToIndex(page){
+  return Math.max(
+    0,
+    Math.min(PAGE_COUNT - 2, (+page || 2) - 2)
+  );
+}
+
+function catalogTargetRect(){
+  const {
+    width: viewportWidth,
+    height: viewportHeight
+  } = viewportSize();
+
+  const topbar = document.querySelector('.topbar');
+
+  const topbarBottom = topbar
+    ? topbar.getBoundingClientRect().bottom
+    : 0;
+
+  const single = pagesPerView() === 1;
+
+  const ratio = single
+    ? 1850 / 2813
+    : 3700 / 2813;
+
+  const horizontalGap = single ? 30 : 90;
+  const bottomGap = 12;
+
+  const availableWidth = Math.max(
+    200,
+    viewportWidth - horizontalGap
+  );
+
+  const availableHeight = Math.max(
+    200,
+    viewportHeight - topbarBottom - bottomGap
+  );
+
+  let width = availableWidth;
+  let height = width / ratio;
+
+  if (height > availableHeight) {
+    height = availableHeight;
+    width = height * ratio;
+  }
+
+  if (!single && viewportWidth > 1500 && width > 1400) {
+    width = 1400;
+    height = width / ratio;
+  }
+
+  if (single && width > 760) {
+    width = 760;
+    height = width / ratio;
+  }
+
+  return {
+    left: Math.max(
+      0,
+      (viewportWidth - width) / 2
+    ),
+
+    top:
+      topbarBottom +
+      Math.max(
+        0,
+        (availableHeight - height) / 2
+      ),
+
     width,
     height
   };
 }
+
 function pageFlipSize(){
-  const rect=catalogTargetRect();
-  const single=pagesPerView()===1;
-  const pageWidth=single ? Math.round(rect.width) : Math.floor(rect.width/2);
+  const rect = catalogTargetRect();
+  const single = pagesPerView() === 1;
+
+  const totalWidth = Math.round(rect.width);
+  const height = Math.round(rect.height);
+
+  const pageWidth = single
+    ? totalWidth
+    : Math.floor(totalWidth / 2);
+
   return {
     pageWidth,
-    height:Math.round(rect.height),
-    totalWidth:single ? Math.round(rect.width) : pageWidth*2
+    height,
+    totalWidth: single
+      ? pageWidth
+      : pageWidth * 2
   };
 }
+
 function applyPageFlipSize(){
-  const size=pageFlipSize();
-  const pages=$('pages');
-  pages.style.setProperty('width',size.totalWidth+'px','important');
-  pages.style.setProperty('height',size.height+'px','important');
-  pages.style.setProperty('aspect-ratio','auto','important');
-  pages.style.setProperty('min-width',size.totalWidth+'px','important');
-  pages.style.setProperty('min-height',size.height+'px','important');
+  const size = pageFlipSize();
+  const pages = $('pages');
+
+  pages.style.setProperty(
+    'width',
+    `${size.totalWidth}px`,
+    'important'
+  );
+
+  pages.style.setProperty(
+    'height',
+    `${size.height}px`,
+    'important'
+  );
+
+  pages.style.setProperty(
+    'aspect-ratio',
+    'auto',
+    'important'
+  );
+
+  pages.style.setProperty(
+    'min-width',
+    '0',
+    'important'
+  );
+
+  pages.style.setProperty(
+    'min-height',
+    '0',
+    'important'
+  );
+
+  pages.style.setProperty(
+    'max-width',
+    'none',
+    'important'
+  );
+
+  pages.style.setProperty(
+    'max-height',
+    'none',
+    'important'
+  );
+
   return size;
 }
+
 function syncPageFlipFrame(){
-  const size=applyPageFlipSize();
-  const wrapper=$('pages').querySelector('.stf__wrapper');
-  const block=$('pages').querySelector('.stf__block');
-  if(wrapper){
-    wrapper.style.setProperty('width','100%','important');
-    wrapper.style.setProperty('height',size.height+'px','important');
-    wrapper.style.setProperty('padding-bottom','0','important');
+  const size = applyPageFlipSize();
+
+  const wrapper =
+    $('pages').querySelector('.stf__wrapper');
+
+  const block =
+    $('pages').querySelector('.stf__block');
+
+  if (wrapper) {
+    wrapper.style.setProperty(
+      'width',
+      '100%',
+      'important'
+    );
+
+    wrapper.style.setProperty(
+      'height',
+      `${size.height}px`,
+      'important'
+    );
+
+    wrapper.style.setProperty(
+      'padding-bottom',
+      '0',
+      'important'
+    );
   }
-  if(block){
-    block.style.setProperty('height',size.height+'px','important');
+
+  if (block) {
+    block.style.setProperty(
+      'height',
+      `${size.height}px`,
+      'important'
+    );
   }
+
   return size;
 }
+
 function destroyPageFlip(){
-  if(!state.pageFlip) return;
-  state.pageFlip.clear();
-  state.pageFlip.getUI().destroy();
-  state.pageFlip=null;
-  state.pageFlipMode=null;
-}
-function setBookPage(page){
-  state.bookPage=page;
-  $('pageIndicator').textContent=`Страница ${state.bookPage} из ${PAGE_COUNT}`;
-}
-function normalizePageForMode(page=state.bookPage){
-  const index=pageToIndex(page);
-  if(pagesPerView()===1) return index+2;
-  return index%2===0 ? index+2 : index+1;
-}
-function showCatalogPage(page){
-  const target=normalizePageForMode(page);
-  state.pageFlip.turnToPage(pageToIndex(target));
-  setBookPage(target);
-  setTimeout(()=>{
-    if(state.pageFlip && state.pageFlip.getCurrentPageIndex()===pageToIndex(target)) setBookPage(target);
-  },40);
-}
-function rebuildPageFlipForViewport(){
-  if($('book').classList.contains('is-closed') || !state.pageFlip) return;
-  const mode=pagesPerView()===1 ? 'portrait' : 'landscape';
-  const page=normalizePageForMode();
-  if(mode!==state.pageFlipMode){
-    destroyPageFlip();
-    initPageFlip();
-  }else{
-    syncPageFlipFrame();
-    state.pageFlip.update();
+  if (!state.pageFlip) return;
+
+  try {
+    state.pageFlip.clear();
+
+    if (state.pageFlip.getUI()) {
+      state.pageFlip.getUI().destroy();
+    }
+  } catch (error) {
+    console.warn('PageFlip destroy:', error);
   }
+
+  state.pageFlip = null;
+  state.pageFlipMode = null;
+}
+
+function setBookPage(page){
+  state.bookPage = page;
+
+  $('pageIndicator').textContent =
+    `Страница ${state.bookPage} из ${PAGE_COUNT}`;
+}
+
+function normalizePageForMode(page = state.bookPage){
+  const index = pageToIndex(page);
+
+  if (pagesPerView() === 1) {
+    return index + 2;
+  }
+
+  return index % 2 === 0
+    ? index + 2
+    : index + 1;
+}
+
+function showCatalogPage(page){
+  if (!state.pageFlip) return;
+
+  const target =
+    normalizePageForMode(page);
+
+  state.pageFlip.turnToPage(
+    pageToIndex(target)
+  );
+
+  setBookPage(target);
+
+  setTimeout(() => {
+    if (
+      state.pageFlip &&
+      state.pageFlip.getCurrentPageIndex() ===
+        pageToIndex(target)
+    ) {
+      setBookPage(target);
+    }
+  }, 50);
+}
+
+function rebuildPageFlipForViewport(){
+  if (
+    $('book').classList.contains('is-closed') ||
+    !state.pageFlip
+  ) {
+    return;
+  }
+
+  const mode =
+    pagesPerView() === 1
+      ? 'portrait'
+      : 'landscape';
+
+  const page =
+    normalizePageForMode(state.bookPage);
+
+  if (mode !== state.pageFlipMode) {
+    destroyPageFlip();
+
+    requestAnimationFrame(() => {
+      initPageFlip();
+      showCatalogPage(page);
+    });
+
+    return;
+  }
+
+  syncPageFlipFrame();
+
+  try {
+    state.pageFlip.update();
+  } catch (error) {
+    console.warn('PageFlip update:', error);
+  }
+
   showCatalogPage(page);
 }
+
 function openCatalogFromShelf(button){
-  if($('book').dataset.opening==='true') return;
-  $('book').dataset.opening='true';
-  const start=button.getBoundingClientRect();
-  const target=catalogTargetRect();
-  const ghost=button.cloneNode(true);
-  ghost.className=`catalog-zoom-ghost ${button.className}`;
-  Object.assign(ghost.style,{
-    left:start.left+'px',
-    top:start.top+'px',
-    width:start.width+'px',
-    height:start.height+'px'
-  });
-  const ghostTitle=ghost.querySelector('.catalog-name');
-  if(ghostTitle) ghostTitle.style.fontSize=getComputedStyle(button.querySelector('.catalog-name')).fontSize;
+  if ($('book').dataset.opening === 'true') {
+    return;
+  }
+
+  $('book').dataset.opening = 'true';
+
+  const start =
+    button.getBoundingClientRect();
+
+  const target =
+    catalogTargetRect();
+
+  const ghost =
+    button.cloneNode(true);
+
+  ghost.className =
+    `catalog-zoom-ghost ${button.className}`;
+
+  Object.assign(
+    ghost.style,
+    {
+      left: start.left + 'px',
+      top: start.top + 'px',
+      width: start.width + 'px',
+      height: start.height + 'px'
+    }
+  );
+
+  const ghostTitle =
+    ghost.querySelector('.catalog-name');
+
+  const originalTitle =
+    button.querySelector('.catalog-name');
+
+  if (ghostTitle && originalTitle) {
+    ghostTitle.style.fontSize =
+      getComputedStyle(originalTitle).fontSize;
+  }
+
   document.body.appendChild(ghost);
-  button.style.visibility='hidden';
-  requestAnimationFrame(()=>{
-    Object.assign(ghost.style,{
-      left:target.left+'px',
-      top:target.top+'px',
-      width:target.width+'px',
-      height:target.height+'px',
-      opacity:'0'
-    });
+
+  button.style.visibility = 'hidden';
+
+  requestAnimationFrame(() => {
+    Object.assign(
+      ghost.style,
+      {
+        left: target.left + 'px',
+        top: target.top + 'px',
+        width: target.width + 'px',
+        height: target.height + 'px',
+        opacity: '0'
+      }
+    );
   });
-  setTimeout(()=>{
-    button.style.visibility='';
+
+  setTimeout(() => {
+    button.style.visibility = '';
+
     ghost.remove();
+
     delete $('book').dataset.opening;
-    openBook(2,true);
-  },920);
+
+    openBook(2, true);
+  }, 920);
 }
-function openBook(page=1,fromCover=false){
+
+function openBook(page = 1, fromCover = false){
   $('book').classList.remove('is-closed');
-  const target=normalizePageForMode(fromCover ? 2 : Math.max(2,page));
-  requestAnimationFrame(()=>{
+
+  const target =
+    normalizePageForMode(
+      fromCover
+        ? 2
+        : Math.max(2, page)
+    );
+
+  requestAnimationFrame(() => {
     initPageFlip();
     showCatalogPage(target);
   });
-  if(fromCover){
-    $('book').classList.remove('book-opening');
-    requestAnimationFrame(()=>requestAnimationFrame(()=>$('book').classList.add('book-opening')));
-    setTimeout(()=>$('book').classList.remove('book-opening'),850);
+
+  if (fromCover) {
+    $('book').classList.remove(
+      'book-opening'
+    );
+
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        $('book').classList.add(
+          'book-opening'
+        )
+      )
+    );
+
+    setTimeout(
+      () =>
+        $('book').classList.remove(
+          'book-opening'
+        ),
+      850
+    );
   }
 }
+
 function closeBook(){
   $('book').classList.add('is-closed');
+
   destroyPageFlip();
 }
+
 function turnPage(direction){
-  if(!state.pageFlip) return;
+  if (!state.pageFlip) return;
+
   syncPageFlipFrame();
-  const before=state.pageFlip.getCurrentPageIndex();
-  const step=pagesPerView()===1 ? 1 : 2;
-  const fallbackTarget=Math.max(0,Math.min(PAGE_COUNT-2,before+(direction>0 ? step : -step)));
-  direction>0 ? state.pageFlip.flipNext('bottom') : state.pageFlip.flipPrev('bottom');
-  setTimeout(()=>{
-    if(!state.pageFlip || state.pageFlip.getCurrentPageIndex()!==before) return;
-    state.pageFlip.turnToPage(fallbackTarget);
-  },930);
+
+  const before =
+    state.pageFlip.getCurrentPageIndex();
+
+  const step =
+    pagesPerView() === 1 ? 1 : 2;
+
+  const fallbackTarget =
+    Math.max(
+      0,
+      Math.min(
+        PAGE_COUNT - 2,
+        before +
+          (
+            direction > 0
+              ? step
+              : -step
+          )
+      )
+    );
+
+  if (direction > 0) {
+    state.pageFlip.flipNext('bottom');
+  } else {
+    state.pageFlip.flipPrev('bottom');
+  }
+
+  setTimeout(() => {
+    if (
+      !state.pageFlip ||
+      state.pageFlip.getCurrentPageIndex() !==
+        before
+    ) {
+      return;
+    }
+
+    state.pageFlip.turnToPage(
+      fallbackTarget
+    );
+  }, 780);
 }
+
 function initPageFlip(){
-  if(state.pageFlip) return;
-  if(!window.St?.PageFlip) throw new Error('PageFlip library is not loaded');
-  state.pageFlipMode=pagesPerView()===1 ? 'portrait' : 'landscape';
-  const size=applyPageFlipSize();
-  state.pageFlip=new St.PageFlip($('pages'),{
-    width:694,
-    height:1056,
-    size:'stretch',
-    minWidth:size.pageWidth,
-    maxWidth:size.pageWidth,
-    minHeight:size.height,
-    maxHeight:size.height,
-    drawShadow:true,
-    flippingTime:900,
-    usePortrait:true,
-    startZIndex:0,
-    autoSize:false,
-    maxShadowOpacity:.65,
-    showCover:false,
-    mobileScrollSupport:false,
-    swipeDistance:20,
-    clickEventForward:true,
-    useMouseEvents:false,
-    showPageCorners:false,
-    disableFlipByClick:true
-  });
-  state.pageFlip.on('flip',e=>{
-    setBookPage(e.data+2);
-  });
-  state.pageFlip.on('init',e=>{
-    setBookPage(e.data.page+2);
-  });
-  state.pageFlip.on('changeOrientation',()=>{
+  if (state.pageFlip) return;
+
+  if (!window.St?.PageFlip) {
+    throw new Error(
+      'PageFlip library is not loaded'
+    );
+  }
+
+  const single =
+    pagesPerView() === 1;
+
+  state.pageFlipMode =
+    single
+      ? 'portrait'
+      : 'landscape';
+
+  const size =
+    applyPageFlipSize();
+
+  state.pageFlip =
+    new St.PageFlip(
+      $('pages'),
+      {
+        width: 694,
+        height: 1056,
+
+        size: 'stretch',
+
+        minWidth: size.pageWidth,
+        maxWidth: size.pageWidth,
+
+        minHeight: size.height,
+        maxHeight: size.height,
+
+        drawShadow: true,
+
+        flippingTime: 700,
+
+        usePortrait: true,
+
+        startZIndex: 0,
+
+        autoSize: false,
+
+        maxShadowOpacity: .45,
+
+        showCover: false,
+
+        mobileScrollSupport: true,
+
+        swipeDistance: 30,
+
+        clickEventForward: true,
+
+        useMouseEvents: true,
+
+        showPageCorners: false,
+
+        disableFlipByClick: true
+      }
+    );
+
+  state.pageFlip.on(
+    'flip',
+    e => {
+      setBookPage(
+        e.data + 2
+      );
+    }
+  );
+
+  state.pageFlip.on(
+    'init',
+    e => {
+      setBookPage(
+        e.data.page + 2
+      );
+    }
+  );
+
+  state.pageFlip.on(
+    'changeOrientation',
+    () => {
+      requestAnimationFrame(() => {
+        syncPageFlipFrame();
+
+        if (state.bookPage) {
+          showCatalogPage(
+            state.bookPage
+          );
+        }
+      });
+    }
+  );
+
+  state.pageFlip.loadFromHTML(
+    document.querySelectorAll(
+      '#pages > .page'
+    )
+  );
+
+  requestAnimationFrame(() => {
     syncPageFlipFrame();
-    if(state.bookPage) showCatalogPage(state.bookPage);
-  });
-  state.pageFlip.loadFromHTML(document.querySelectorAll('#pages > .page'));
-  requestAnimationFrame(()=>{
-    syncPageFlipFrame();
-    state.pageFlip.update();
+
+    try {
+      state.pageFlip.update();
+    } catch (error) {
+      console.warn(
+        'PageFlip first update:',
+        error
+      );
+    }
   });
 }
-window.addEventListener('resize',()=>{
-  clearTimeout(state.resizeTimer);
-  state.resizeTimer=setTimeout(rebuildPageFlipForViewport,180);
-});
+
+function handleViewportChange(){
+  clearTimeout(
+    state.resizeTimer
+  );
+
+  state.resizeTimer =
+    setTimeout(() => {
+      rebuildPageFlipForViewport();
+    }, 250);
+}
+
+window.addEventListener(
+  'resize',
+  handleViewportChange
+);
+
+window.addEventListener(
+  'orientationchange',
+  handleViewportChange
+);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener(
+    'resize',
+    handleViewportChange
+  );
+}
+
+
+
 function openModal(id){$(id).classList.remove('hidden')} function closeModal(id){$(id).classList.add('hidden')}
 function openProduct(id){
   const p=state.products.find(x=>x.id===id); state.current=p; const s=state.selected[id]||{};
