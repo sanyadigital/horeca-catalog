@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HoReCa Interactive Catalogue</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <a class="brand-link" href="https://foodservice.am/" target="_blank" rel="noopener noreferrer" aria-label="Alpha Food Service">
+      <img class="brand-logo" src="assets/foodservice-logo.svg" alt="Alpha Food Service" />
+    </a>
+    <small>Interactive HoReCa Catalogue</small>
+  </div>
+  <div class="actions">
+    <button id="clientBtn">Клиент</button>
+    <button id="reportBtn">Итог встречи <b id="selectedCount">0</b></button>
+    <button id="clearBtn" class="danger">Очистить</button>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <input id="search" placeholder="Поиск товара, бренда, категории..." />
+  <select id="categoryFilter"><option value="">Все категории</option></select>
+  <div id="pageList" class="page-list"></div>
+</aside>
+
+<main class="viewer">
+    <div id="book" class="book is-closed">
+    <div id="catalogHome" class="catalog-home" aria-label="Выбор каталога">
+      <div class="home-copy">
+        <h1>Профессиональные решения<br>для <span>HoReCa</span> и <span>Retail</span></h1>
+        <p>Интерактивный каталог продукции и решений<br>для ресторанов, кафе, баров и розничной торговли</p>
+      </div>
+
+      <div class="catalog-showcase" aria-label="Каталоги Alpha Food Service">
+        <article class="catalog-item">
+          <button class="catalog-card retail-food" type="button" data-open-catalog data-catalog="retail-food" aria-label="Открыть Retail Food Catalogue">
+            <img src="assets/catalog-covers/retail-food.png" alt="Retail Food Catalogue" />
+          </button>
+          <h2>Retail Food</h2>
+          <p>Продукты и ингредиенты<br>для розничной торговли<br>и дома</p>
+        </article>
+        <article class="catalog-item">
+          <button class="catalog-card retail-beverage" type="button" data-open-catalog data-catalog="retail-beverage" aria-label="Открыть Retail Beverage Catalogue">
+            <img src="assets/catalog-covers/retail-beverage.png" alt="Retail Beverage Catalogue" />
+          </button>
+          <h2>Retail Beverage</h2>
+          <p>Напитки и решения<br>для розничной торговли<br>и дома</p>
+        </article>
+        <article class="catalog-item">
+          <button class="catalog-card pastry" type="button" data-open-catalog data-catalog="horeca-pastry" aria-label="Открыть HoReCa Pastry Catalogue">
+            <img src="assets/catalog-covers/horeca-pastry.png" alt="HoReCa Pastry Catalogue" />
+          </button>
+          <h2>HoReCa Pastry</h2>
+          <p>Ингредиенты и решения<br>для кондитерских изделий<br>и выпечки</p>
+        </article>
+        <article class="catalog-item">
+          <button class="catalog-card beverage" type="button" data-open-catalog data-catalog="horeca-beverage" aria-label="Открыть HoReCa Beverage Catalogue">
+            <img src="assets/catalog-covers/horeca-beverage.png" alt="HoReCa Beverage Catalogue" />
+          </button>
+          <h2>HoReCa Beverage</h2>
+          <p>Напитки и ингредиенты<br>для баров, ресторанов<br>и кафе</p>
+        </article>
+        <article class="catalog-item">
+          <button class="catalog-card food active" type="button" data-open-catalog data-catalog="horeca-food" aria-label="Открыть HoReCa Food Catalogue">
+            <img src="assets/catalog-covers/horeca-food.png" alt="HoReCa Food Catalogue" />
+          </button>
+          <h2>HoReCa Food</h2>
+          <p>Комплексные решения<br>для профессиональной кухни<br>и ресторанного бизнеса</p>
+        </article>
+      </div>
+
+      <div class="feature-strip" aria-label="Преимущества">
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" focusable="false">
+              <path d="M6 36h36" />
+              <path d="M10 32a14 14 0 0 1 28 0" />
+              <path d="M24 12v6" />
+              <path d="M20 12h8" />
+            </svg>
+          </span>
+          <p><b>Широкий ассортимент</b><br>Решения для HoReCa и Retail<br>на любой вкус</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" focusable="false">
+              <path d="M24 5l4.5 3 5.4-.4 2 5 4.3 3.3-1.5 5.2 1.5 5.2-4.3 3.3-2 5-5.4-.4-4.5 3-4.5-3-5.4.4-2-5-4.3-3.3 1.5-5.2-1.5-5.2 4.3-3.3 2-5 5.4.4L24 5z" />
+              <path d="M19 37l-3 7 8-3 8 3-3-7" />
+              <path d="M20 21l3 3 6-7" />
+            </svg>
+          </span>
+          <p><b>Проверенное качество</b><br>Только лучшие ингредиенты<br>и проверенные поставщики</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" focusable="false">
+              <path d="M14 5v38" />
+              <path d="M8 5v12a6 6 0 0 0 12 0V5" />
+              <path d="M34 5v38" />
+              <path d="M34 5c-5 5-7 10-7 18h7" />
+            </svg>
+          </span>
+          <p><b>Вдохновение для меню</b><br>Идеи и решения для создания<br>уникальных блюд и напитков</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" focusable="false">
+              <path d="M5 15h25v18H5z" />
+              <path d="M30 22h7l6 6v5H30z" />
+              <path d="M12 39a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+              <path d="M35 39a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+              <path d="M5 33h3" />
+              <path d="M16 33h15" />
+              <path d="M39 33h4" />
+            </svg>
+          </span>
+          <p><b>Надежные поставки</b><br>Своевременная доставка<br>и поддержка на каждом этапе</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="bookSpread" class="book-spread">
+      <button id="prevPage" class="page-arrow prev" type="button" aria-label="Предыдущая страница">‹</button>
+      <div id="pages" class="pages" aria-live="polite"></div>
+      <button id="nextPage" class="page-arrow next" type="button" aria-label="Следующая страница">›</button>
+    </div>
+
+    <div class="book-controls">
+      <button id="closeBook" class="book-close" type="button">Закрыть книгу</button>
+      <span id="pageIndicator" class="page-indicator"></span>
+    </div>
+  </div>
+</main>
+
+<div id="productModal" class="modal hidden">
+  <div class="modal-card">
+    <button class="x" data-close="productModal">×</button>
+    <h2 id="mTitle"></h2>
+    <div class="meta" id="mMeta"></div>
+    <label class="check"><input type="checkbox" id="mOrder" /> Заказать</label>
+    <label class="check"><input type="checkbox" id="mSample" /> Запросить образец для тестирования</label>
+    <label class="check"><input type="checkbox" id="mSpecial" /> Запросить специальное условие</label>
+    <div id="mQuantityWrap" class="quantity-field hidden">
+      <strong>Выберите объём и количество</strong>
+      <div id="mOrderVariants" class="order-variants"></div>
+      <small>Можно заказать несколько вариантов одновременно.</small>
+    </div>
+    <label>Комментарий менеджера<textarea id="mComment" rows="4" placeholder="Например: нужны специальные условия, отправить образец, возможен регулярный заказ..."></textarea></label>
+    <div class="modal-actions">
+      <button id="saveProduct" class="primary">Сохранить</button>
+      <button id="removeProduct" class="danger secondary">Удалить из выбранных</button>
+    </div>
+  </div>
+</div>
+
+<div id="clientModal" class="modal hidden">
+  <div class="modal-card wide">
+    <button class="x" data-close="clientModal">×</button>
+    <h2>Карточка клиента</h2>
+    <div class="form-grid">
+      <input id="cCompany" placeholder="Компания *" autocomplete="organization" required />
+      <input id="cPerson" placeholder="Контактное лицо *" autocomplete="name" required />
+      <input id="cPhone" type="tel" inputmode="numeric" placeholder="+374 XX XXX XXX *" autocomplete="tel" maxlength="15" pattern="\+374 [0-9]{2} [0-9]{3} [0-9]{3}" title="Введите номер в формате +374 XX XXX XXX" required />
+      <input id="cEmail" type="email" placeholder="E-mail *" autocomplete="email" required />
+      <select id="cType"><option>Ресторан</option><option>Кафе</option><option>Гостиница</option><option>Кейтеринг</option><option>Магазин</option><option>Дистрибьютор</option><option>Другое</option></select>
+      <input id="cManager" placeholder="Менеджер" />
+      <input id="cDate" type="date" />
+      <input id="cAddress" placeholder="Юридический адрес" autocomplete="street-address" />
+      <input id="cDeliveryAddress" class="full-row" placeholder="Адрес доставки" autocomplete="shipping street-address" />
+    </div>
+    <textarea id="cComment" rows="3" placeholder="Общий комментарий по встрече"></textarea>
+    <button id="saveClient" class="primary">Сохранить клиента</button>
+  </div>
+</div>
+
+<div id="reportModal" class="modal hidden">
+  <div class="modal-card report-card">
+    <button class="x" data-close="reportModal">×</button>
+    <h2>Итог встречи</h2>
+    <div id="reportSummary" class="summary"></div>
+    <div class="table-wrap"><table id="reportTable"></table></div>
+    <div class="modal-actions">
+      <button id="downloadPdf" class="primary">Скачать отчет PDF</button>
+      <button id="downloadExcel" class="excel">Скачать отчет Excel</button>
+      <button id="sendWhatsapp" class="whatsapp">Отправить по WhatsApp</button>
+      <button id="sendTelegram" class="telegram">Отправить по Telegram</button>
+    </div>
+  </div>
+</div>
+
+<script src="node_modules/page-flip/dist/js/page-flip.browser.js"></script>
+<script src="node_modules/jspdf/dist/jspdf.umd.min.js"></script>
+<script src="node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="node_modules/exceljs/dist/exceljs.min.js"></script>
+<script src="assets/fonts/font-data.js"></script>
+<script src="assets/pdf-logo-data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
