@@ -215,7 +215,9 @@ const state = {
   client: JSON.parse(localStorage.getItem('clientData') || '{}'),
   current: null,
   bookPage: 1,
-  pageFlip: null
+  pageFlip: null,
+  resizeTimer: null,
+  pageFlipMode: null
 };
 
 const $ = id => document.getElementById(id);
@@ -360,7 +362,7 @@ function catalogTargetRect(){
   const single=pagesPerView()===1;
   const ratio=single ? 1850/2813 : 3700/2813;
   const widthLimit=single ? Math.min(window.innerWidth-18,710) : Math.min(window.innerWidth-36,1320);
-  const heightLimit=window.innerHeight-(single?150:136);
+  const heightLimit=window.innerHeight-(single?100:92);
   const width=Math.max(1,Math.min(widthLimit,heightLimit*ratio));
   const height=width/ratio;
   return {
@@ -369,6 +371,77 @@ function catalogTargetRect(){
     width,
     height
   };
+}
+function pageFlipSize(){
+  const rect=catalogTargetRect();
+  const single=pagesPerView()===1;
+  const pageWidth=single ? Math.round(rect.width) : Math.floor(rect.width/2);
+  return {
+    pageWidth,
+    height:Math.round(rect.height),
+    totalWidth:single ? Math.round(rect.width) : pageWidth*2
+  };
+}
+function applyPageFlipSize(){
+  const size=pageFlipSize();
+  const pages=$('pages');
+  pages.style.setProperty('width',size.totalWidth+'px','important');
+  pages.style.setProperty('height',size.height+'px','important');
+  pages.style.setProperty('aspect-ratio','auto','important');
+  pages.style.setProperty('min-width',size.totalWidth+'px','important');
+  pages.style.setProperty('min-height',size.height+'px','important');
+  return size;
+}
+function syncPageFlipFrame(){
+  const size=applyPageFlipSize();
+  const wrapper=$('pages').querySelector('.stf__wrapper');
+  const block=$('pages').querySelector('.stf__block');
+  if(wrapper){
+    wrapper.style.setProperty('width','100%','important');
+    wrapper.style.setProperty('height',size.height+'px','important');
+    wrapper.style.setProperty('padding-bottom','0','important');
+  }
+  if(block){
+    block.style.setProperty('height',size.height+'px','important');
+  }
+  return size;
+}
+function destroyPageFlip(){
+  if(!state.pageFlip) return;
+  state.pageFlip.clear();
+  state.pageFlip.getUI().destroy();
+  state.pageFlip=null;
+  state.pageFlipMode=null;
+}
+function setBookPage(page){
+  state.bookPage=page;
+  $('pageIndicator').textContent=`Страница ${state.bookPage} из ${PAGE_COUNT}`;
+}
+function normalizePageForMode(page=state.bookPage){
+  const index=pageToIndex(page);
+  if(pagesPerView()===1) return index+2;
+  return index%2===0 ? index+2 : index+1;
+}
+function showCatalogPage(page){
+  const target=normalizePageForMode(page);
+  state.pageFlip.turnToPage(pageToIndex(target));
+  setBookPage(target);
+  setTimeout(()=>{
+    if(state.pageFlip && state.pageFlip.getCurrentPageIndex()===pageToIndex(target)) setBookPage(target);
+  },40);
+}
+function rebuildPageFlipForViewport(){
+  if($('book').classList.contains('is-closed') || !state.pageFlip) return;
+  const mode=pagesPerView()===1 ? 'portrait' : 'landscape';
+  const page=normalizePageForMode();
+  if(mode!==state.pageFlipMode){
+    destroyPageFlip();
+    initPageFlip();
+  }else{
+    syncPageFlipFrame();
+    state.pageFlip.update();
+  }
+  showCatalogPage(page);
 }
 function openCatalogFromShelf(button){
   if($('book').dataset.opening==='true') return;
@@ -405,10 +478,10 @@ function openCatalogFromShelf(button){
 }
 function openBook(page=1,fromCover=false){
   $('book').classList.remove('is-closed');
-  const target=fromCover ? 2 : Math.max(2,page);
+  const target=normalizePageForMode(fromCover ? 2 : Math.max(2,page));
   requestAnimationFrame(()=>{
     initPageFlip();
-    state.pageFlip.turnToPage(pageToIndex(target));
+    showCatalogPage(target);
   });
   if(fromCover){
     $('book').classList.remove('book-opening');
@@ -418,49 +491,67 @@ function openBook(page=1,fromCover=false){
 }
 function closeBook(){
   $('book').classList.add('is-closed');
+  destroyPageFlip();
 }
 function turnPage(direction){
   if(!state.pageFlip) return;
+  syncPageFlipFrame();
+  const before=state.pageFlip.getCurrentPageIndex();
+  const step=pagesPerView()===1 ? 1 : 2;
+  const fallbackTarget=Math.max(0,Math.min(PAGE_COUNT-2,before+(direction>0 ? step : -step)));
   direction>0 ? state.pageFlip.flipNext('bottom') : state.pageFlip.flipPrev('bottom');
+  setTimeout(()=>{
+    if(!state.pageFlip || state.pageFlip.getCurrentPageIndex()!==before) return;
+    state.pageFlip.turnToPage(fallbackTarget);
+  },930);
 }
 function initPageFlip(){
   if(state.pageFlip) return;
   if(!window.St?.PageFlip) throw new Error('PageFlip library is not loaded');
+  state.pageFlipMode=pagesPerView()===1 ? 'portrait' : 'landscape';
+  const size=applyPageFlipSize();
   state.pageFlip=new St.PageFlip($('pages'),{
     width:694,
     height:1056,
     size:'stretch',
-    minWidth:window.innerWidth <= 520 ? 340 : 375,
-    maxWidth:680,
-    minHeight:380,
-    maxHeight:1034,
+    minWidth:size.pageWidth,
+    maxWidth:size.pageWidth,
+    minHeight:size.height,
+    maxHeight:size.height,
     drawShadow:true,
     flippingTime:900,
     usePortrait:true,
     startZIndex:0,
-    autoSize:true,
+    autoSize:false,
     maxShadowOpacity:.65,
     showCover:false,
     mobileScrollSupport:false,
     swipeDistance:20,
     clickEventForward:true,
-    useMouseEvents:true,
-    showPageCorners:true,
+    useMouseEvents:false,
+    showPageCorners:false,
     disableFlipByClick:true
   });
   state.pageFlip.on('flip',e=>{
-    state.bookPage=e.data+2;
-    $('pageIndicator').textContent=`Страница ${state.bookPage} из ${PAGE_COUNT}`;
+    setBookPage(e.data+2);
   });
   state.pageFlip.on('init',e=>{
-    state.bookPage=e.data.page+2;
-    $('pageIndicator').textContent=`Страница ${state.bookPage} из ${PAGE_COUNT}`;
+    setBookPage(e.data.page+2);
   });
   state.pageFlip.on('changeOrientation',()=>{
-    if(state.bookPage) state.pageFlip.turnToPage(pageToIndex(state.bookPage));
+    syncPageFlipFrame();
+    if(state.bookPage) showCatalogPage(state.bookPage);
   });
   state.pageFlip.loadFromHTML(document.querySelectorAll('#pages > .page'));
+  requestAnimationFrame(()=>{
+    syncPageFlipFrame();
+    state.pageFlip.update();
+  });
 }
+window.addEventListener('resize',()=>{
+  clearTimeout(state.resizeTimer);
+  state.resizeTimer=setTimeout(rebuildPageFlipForViewport,180);
+});
 function openModal(id){$(id).classList.remove('hidden')} function closeModal(id){$(id).classList.add('hidden')}
 function openProduct(id){
   const p=state.products.find(x=>x.id===id); state.current=p; const s=state.selected[id]||{};
